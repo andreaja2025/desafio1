@@ -1,73 +1,83 @@
 #include "tablero.h"
 #include <iostream>
+#include <cstdlib> // para utilizar rand() en generarFichaRandom()
 
 using namespace std;
 
 unsigned char* crearTablero(unsigned short bytesTab) {
-    //esta funcion se encarga de reservar el espacio necesario
-    //para el tablero solicitado, podría asignar a todos los espacios un
-    //vacio pero lo mejor será que no a menos de ser necesario
+    // esta funcion se encarga de reservar el espacio necesario
+    // para el tablero solicitado, podría asignar a todos los espacios un
+    // vacio pero lo mejor será que no a menos de ser necesario
 
-    unsigned char* tab = new unsigned char[bytesTab] {}; //incializado en 0
+    unsigned char* tab = new unsigned char[bytesTab]{}; // incializado en 0
     return tab;
 }
 
-void verTableroBits(unsigned char* ptrTablero, short fil, short col){
-    unsigned int bitsTab = fil*col*3; //bits
-    short bytesTab = 0;
-    if(bitsTab%8!=0){ //bytes precisos que requiere el tablero
-        bytesTab = bitsTab/8+1;
-    } else bytesTab = bitsTab/8;
-    //int cantFichas = fil*col; //esto x3 sería lo que se imprime
-    unsigned int bitsReserv = bytesTab*8;
-    short byteInicial = 0; //primer byte del tablero jugable
-    short bitsExtras = bitsReserv-bitsTab; //bit del 3er byte donde incia el tablero jugable
-    //unsigned short bitTabActual =  ;
+void verTableroBits(unsigned char* ptrTablero, unsigned short fil, unsigned short col, unsigned short bitsExtras) {
+    unsigned int bitsTab = fil * col * 3; // bits
+    unsigned short bytesTab = (bitsTab % 8 != 0) ? (bitsTab / 8 + 1) : (bitsTab / 8); // bytes precisos que requiere el tablero
+    // int cantFichas = fil*col; // esto x3 sería lo que se imprime
+    unsigned int bitsReserv = bytesTab * 8;
+    unsigned short byteInicial = 0; // primer byte del tablero jugable
+    // unsigned short bitTabActual = ;
 
-    cout << "bitsTab: " << bitsTab <<endl;
-    cout << "bitsReserv: " << bitsReserv <<endl;
-    cout << "bitsExtras: " << bitsExtras <<endl;
+    cout << "bitsTab: " << bitsTab << endl;
+    cout << "bitsReserv: " << bitsReserv << endl;
+    cout << "bitsExtras: " << bitsExtras << endl;
     cout << "Byte incial del tablero reservado: ";
     for (int bit = 8; bit > 0; bit--) {
         cout << ((ptrTablero[0] >> bit) & 1);
     }
-    cout <<endl;
+    cout << endl;
 
-    for (short i = 0; i<=col; i++){
-        if (i<10){
-            cout << '0'<< i << "  ";
+    for (unsigned short i = 0; i <= col; i++) {
+        if (i < 10) {
+            cout << '0' << i << "  ";
         } else cout << i << "  ";
     }
 
-    short cont3bits = 0;
-    short contFilas = 1;
+    unsigned short cont3bits = 0;
+    unsigned short contFilas = 1;
 
-    for (int i = byteInicial; i < bytesTab; i++) {
+    for (unsigned short i = byteInicial; i < bytesTab; i++) {
         for (int bit = 8; bit > 0; bit--) {
-            if (cont3bits%((col*3)) == 0) {
+            if (cont3bits % (col * 3) == 0) {
                 cout << endl;
-                if (contFilas<10) cout << '0'<< contFilas;
+                if (contFilas < 10) cout << '0' << contFilas;
                 else cout << contFilas;
                 contFilas++;
             }
-            if ((cont3bits%3) == 0) cout << " ";
-            //los condicionales sgtes son claves pa no imprimir los bits vacios a la izq
-            if (i==byteInicial) {          //(8-bitsExtras)
-                cout << ((ptrTablero[i] >> (bit-bitsExtras)) & 1);
+            if ((cont3bits % 3) == 0) cout << " ";
+            // los condicionales sgtes son claves pa no imprimir los bits vacios a la izq
+            if (i == byteInicial) {          // (8-bitsExtras)
+                cout << ((ptrTablero[i] >> (bit - bitsExtras)) & 1);
                 cont3bits++;
-                if (bit-bitsExtras==1) break; //sale del for cuando se acaba el 1er byte
-            }
-
-            else {
+                if (bit - bitsExtras == 1) break; // sale del for cuando se acaba el 1er byte
+            } else {
                 cout << ((ptrTablero[i] >> bit) & 1);
                 cont3bits++;
             }
         }
     }
+    cout << endl;
+}
+
+// Genera un valor aleatorio de ficha (1 a 7)
+unsigned char generarFichaRandom() {
+    return (rand() % 6) + 1;
+}
+
+// Recorre todas las posiciones escribiendo una ficha aleatoria
+void llenarTableroRandom(unsigned char* ptrTablero, unsigned short fil, unsigned short col, unsigned short bitsExtras) {
+    for (unsigned short f = 0; f < fil; f++) {
+        for (unsigned short c = 0; c < col; c++) {
+            escribirFicha(ptrTablero, f, c, col, bitsExtras, generarFichaRandom());
+        }
+    }
 }
 
 // Extrae una ficha de 3 bits utilizando operaciones de byte completo (máscaras y desplazamientos)
-unsigned char obtenerFicha(unsigned char* ptrTablero, short fil, short col, short totalCols, short bitsExtras) {
+unsigned char obtenerFicha(unsigned char* ptrTablero, unsigned short fil, unsigned short col, unsigned short totalCols, unsigned short bitsExtras) {
     unsigned int bitInicio = bitsExtras + (fil * totalCols + col) * 3;
     unsigned int numByte = bitInicio / 8;
     unsigned int bitDentroByte = bitInicio % 8;
@@ -80,8 +90,8 @@ unsigned char obtenerFicha(unsigned char* ptrTablero, short fil, short col, shor
     }
     // Caso 2: La ficha está dividida entre dos bytes consecutivos
     else {
-        short bitsEnPrimerByte = 8 - bitDentroByte;
-        short bitsEnSegundoByte = 3 - bitsEnPrimerByte;
+        unsigned short bitsEnPrimerByte = 8 - bitDentroByte;
+        unsigned short bitsEnSegundoByte = 3 - bitsEnPrimerByte;
 
         unsigned char parteAlta = (ptrTablero[numByte] & ((1 << bitsEnPrimerByte) - 1)) << bitsEnSegundoByte;
         unsigned char parteBaja = ptrTablero[numByte + 1] >> (8 - bitsEnSegundoByte);
@@ -93,7 +103,7 @@ unsigned char obtenerFicha(unsigned char* ptrTablero, short fil, short col, shor
 }
 
 // Escribe un valor de 3 bits (0 a 7) en una posición específica de memoria dinámica
-void escribirFicha(unsigned char* ptrTablero, short fil, short col, short totalCols, short bitsExtras, unsigned char valor) {
+void escribirFicha(unsigned char* ptrTablero, unsigned short fil, unsigned short col, unsigned short totalCols, unsigned short bitsExtras, unsigned char valor) {
     unsigned int bitInicio = bitsExtras + (fil * totalCols + col) * 3;
     unsigned int numByte = bitInicio / 8;
     unsigned int bitDentroByte = bitInicio % 8;
@@ -102,14 +112,14 @@ void escribirFicha(unsigned char* ptrTablero, short fil, short col, short totalC
 
     // Caso 1: Los 3 bits están completamente dentro del mismo byte
     if (bitDentroByte <= 5) {
-        short desp = 5 - bitDentroByte;
+        unsigned short desp = 5 - bitDentroByte;
         unsigned char mascara = ~(0x07 << desp);
         ptrTablero[numByte] = (ptrTablero[numByte] & mascara) | (valor << desp);
     }
     // Caso 2: La ficha está dividida entre dos bytes consecutivos
     else {
-        short bitsEnPrimerByte = 8 - bitDentroByte;
-        short bitsEnSegundoByte = 3 - bitsEnPrimerByte;
+        unsigned short bitsEnPrimerByte = 8 - bitDentroByte;
+        unsigned short bitsEnSegundoByte = 3 - bitsEnPrimerByte;
 
         unsigned char mascara1 = ~((1 << bitsEnPrimerByte) - 1);
         unsigned char parteAlta = valor >> bitsEnSegundoByte;
@@ -135,28 +145,28 @@ char obtenerSimbolo(unsigned char valor) {
     }
 }
 
-void verTableroFichas(unsigned char* ptrTablero, short fil, short col) {
+void verTableroFichas(unsigned char* ptrTablero, unsigned short fil, unsigned short col) {
     unsigned int bitsTab = fil * col * 3;
-    short bytesTab = (bitsTab % 8 != 0) ? (bitsTab / 8 + 1) : (bitsTab / 8);
+    unsigned short bytesTab = (bitsTab % 8 != 0) ? (bitsTab / 8 + 1) : (bitsTab / 8);
     unsigned int bitsReserv = bytesTab * 8;
-    short bitsExtras = bitsReserv - bitsTab;
+    unsigned short bitsExtras = bitsReserv - bitsTab;
 
     cout << "\n=== TABLERO JUGABLE ===" << endl;
 
-    // Encabezado de columnas desde 01
+    // Encabezado de columnas
     cout << "00  ";
-    for (short c = 1; c <= col; c++) {
+    for (unsigned short c = 1; c <= col; c++) {
         if (c < 10) cout << "0" << c << " ";
         else cout << c << " ";
     }
     cout << endl;
 
     // Filas con fichas
-    for (short f = 0; f < fil; f++) {
+    for (unsigned short f = 0; f < fil; f++) {
         if (f + 1 < 10) cout << "0" << (f + 1) << "  ";
         else cout << (f + 1) << "  ";
 
-        for (short c = 0; c < col; c++) {
+        for (unsigned short c = 0; c < col; c++) {
             unsigned char valor = obtenerFicha(ptrTablero, f, c, col, bitsExtras);
             char simbolo = obtenerSimbolo(valor);
             cout << " " << simbolo << " ";
@@ -167,6 +177,6 @@ void verTableroFichas(unsigned char* ptrTablero, short fil, short col) {
 }
 
 // Cambia la ficha en la posición especificada al estado Vacío (@ / 0)
-void eliminarFicha(unsigned char* ptrTablero, short fil, short col, short totalCols, short bitsExtras) {
+void eliminarFicha(unsigned char* ptrTablero, unsigned short fil, unsigned short col, unsigned short totalCols, unsigned short bitsExtras) {
     escribirFicha(ptrTablero, fil, col, totalCols, bitsExtras, 0);
 }

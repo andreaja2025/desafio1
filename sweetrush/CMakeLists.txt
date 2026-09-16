@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(sweetrush main.cpp
     tablero.cpp
-    tablero.h)
+    tablero.h
+    juego.h
+    juego.cpp)
 
 include(GNUInstallDirs)
 install(TARGETS sweetrush

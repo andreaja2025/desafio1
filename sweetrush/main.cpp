@@ -4,12 +4,17 @@ de la Universidad de Antioquia
 Desafio 1.
 */
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "tablero.h"
+#include "juego.h"
 
 using namespace std;
 
 int main()
 {
+    srand(time(NULL));
+
     cout << "=================================" << endl;
     cout << "     BIENVENID@ A SWEET CRUSH    " << endl;
     cout << "=================================" << endl;
@@ -20,71 +25,86 @@ int main()
     cout << "Y cuantas columnas?: ";
     cin >> columnas;
 
+    // Cálculo de dimensiones de memoria
     unsigned int bits = filas * columnas * 3;
     unsigned short bytes = (bits % 8 != 0) ? (bits / 8 + 1) : (bits / 8);
     unsigned int bitsReserv = bytes * 8;
-    short bitsExtras = bitsReserv - bits;
+    unsigned short bitsExtras = bitsReserv - bits;
 
+    // Inicialización del tablero
     unsigned char *pTab = crearTablero(bytes);
+    llenarTableroRandom(pTab, filas, columnas, bitsExtras);
 
-    // =========================================================================
-    // OPCIÓN PROVISIONAL: Llenar el tablero con fichas de prueba (valores de 1 a 7)
-    // =========================================================================
-    for (short f = 0; f < filas; f++) {
-        for (short c = 0; c < columnas; c++) {
-            // Asigna valores alternados entre 1 y 7 usando la fórmula ((f + c) % 7) + 1
-            unsigned char valPrueba = ((f + c) % 7) + 1;
-            escribirFicha(pTab, f, c, columnas, bitsExtras, valPrueba);
-        }
-    }
-    // =========================================================================
+    // Variables de estadísticas optimizadas (sin signo)
+    unsigned int puntuacionAcumulada = 0;
+    unsigned int eliminacionesUsuario = 0;
+    unsigned int totalFichasEliminadas = 0;
+    unsigned int combinacionesDetectadas = 0;
 
-    // Muestra los tableros iniciales
-    verTableroBits(pTab, filas, columnas);
-    verTableroFichas(pTab, filas, columnas);
-
-    int opcion = 0;
+    unsigned short opcion = 0;
     do {
-        // Menú de opciones
+        // Se le pasa 'bitsExtras' a verTableroBits
+        verTableroBits(pTab, filas, columnas, bitsExtras);
+        verTableroFichas(pTab, filas, columnas);
+
+        // Menú Principal
         cout << "\n--- MENU DE OPCIONES ---" << endl;
-        cout << "1. Eliminar una Ficha" << endl;
-        cout << "2. Salir" << endl;
+        cout << "1. Eliminar Ficha" << endl;
+        cout << "2. Eliminar Fila" << endl;
+        cout << "3. Eliminar Columna" << endl;
+        cout << "4. Agregar Fila" << endl;
+        cout << "5. Agregar Columna" << endl;
+        cout << "6. Fin" << endl;
         cout << "Seleccione una opcion: ";
         cin >> opcion;
 
-        if (opcion == 1) {
-            short fElegida, cElegida;
+        switch (opcion) {
+        case 1: {
+            unsigned short fElegida, cElegida;
             cout << "\n[ ELIMINAR FICHA ]" << endl;
-
-            // Pedir coordenadas e informar el rango válido
-            cout << "Ingrese la Fila (01 a " << (filas < 10 ? "0" : "") << filas << "): ";
+            cout << "Ingrese la Fila (1 a " << filas << "): ";
             cin >> fElegida;
-            cout << "Ingrese la Columna (01 a " << (columnas < 10 ? "0" : "") << columnas << "): ";
+            cout << "Ingrese la Columna (1 a " << columnas << "): ";
             cin >> cElegida;
 
-            // Validación de entradas dentro del rango
             if (fElegida >= 1 && fElegida <= filas && cElegida >= 1 && cElegida <= columnas) {
-                // Se convierte de 1-based (usuario) a 0-based (arreglo)
                 eliminarFicha(pTab, fElegida - 1, cElegida - 1, columnas, bitsExtras);
+                eliminacionesUsuario++;
 
-                cout << "\nFicha en (" << (fElegida < 10 ? "0" : "") << fElegida
-                     << ", " << (cElegida < 10 ? "0" : "") << cElegida
-                     << ") eliminada exitosamente." << endl;
-
-                // Mostrar el resultado en ambos tableros
-                verTableroBits(pTab, filas, columnas);
-                verTableroFichas(pTab, filas, columnas);
+                cout << "\n--> Aplicando cascada automatica..." << endl;
+                subrutinaCascada(pTab, filas, columnas, bitsExtras);
             } else {
-                cout << "\nCoordenadas fuera de rango. Operacion cancelada." << endl;
+                cout << "\nCoordenadas fuera de rango." << endl;
             }
-        } else if (opcion != 2) {
-            cout << "\nOpcion no valida. Intente de nuevo." << endl;
+            break;
         }
 
-    } while (opcion != 2);
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+            cout << "\n[PROXIMAMENTE] Modificacion de dimensiones del tablero." << endl;
+            break;
 
-    // Liberación de memoria
-    delete[] pTab;
-    cout << "\n¡Gracias por jugar Sweet Crush!" << endl;
+        case 6:
+            delete[] pTab;
+            pTab = nullptr;
+
+            cout << "\n=== RESUMEN FINAL DE ESTADISTICAS ===" << endl;
+            cout << "Puntuacion acumulada: " << puntuacionAcumulada << endl;
+            cout << "Eliminaciones del usuario: " << eliminacionesUsuario << endl;
+            cout << "Total de fichas eliminadas: " << totalFichasEliminadas << endl;
+            cout << "Combinaciones detectadas: " << combinacionesDetectadas << endl;
+            cout << "\n¡Gracias por jugar Sweet Crush!" << endl;
+            return 0;
+
+        default:
+            cout << "\nRespuesta invalida." << endl;
+            break;
+        }
+
+    } while (opcion != 6);
+
+    if (pTab != nullptr) delete[] pTab;
     return 0;
 }
