@@ -2,6 +2,16 @@
 #include <iostream>
 #include <cstdlib> // para utilizar rand() en generarFichaRandom()
 
+/**
+ * ============================================================================
+ * ARCHIVO: tablero.cpp
+ * IMPLEMENTACIÓN: Módulo de Memoria y Bitwise
+ * ----------------------------------------------------------------------------
+ * Implementa las operaciones aritméticas de bits y acceso directo al arreglo
+ * dinámico `unsigned char*` declarado en tablero.h.
+ * ============================================================================
+ */
+
 using namespace std;
 
 unsigned char* crearTablero(unsigned short bytesTab) {

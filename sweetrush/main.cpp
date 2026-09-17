@@ -41,6 +41,11 @@ int main()
     unsigned int totalFichasEliminadas = 0;
     unsigned int combinacionesDetectadas = 0;
 
+    // Evaluación de combinaciones iniciales al crear el tablero
+    subrutinaCombinaciones(pTab, filas, columnas, bitsExtras,
+                           puntuacionAcumulada, totalFichasEliminadas,
+                           combinacionesDetectadas);
+
     unsigned short opcion = 0;
     do {
         // Se le pasa 'bitsExtras' a verTableroBits
@@ -71,8 +76,14 @@ int main()
                 eliminarFicha(pTab, fElegida - 1, cElegida - 1, columnas, bitsExtras);
                 eliminacionesUsuario++;
 
-                cout << "\n--> Aplicando cascada automatica..." << endl;
+                cout << "\n--> Aplicando cascada automatica y evalua posibles combinaciones" << endl;
                 subrutinaCascada(pTab, filas, columnas, bitsExtras);
+
+                // Evaluación de combinaciones resultantes del movimiento
+                subrutinaCombinaciones(pTab, filas, columnas, bitsExtras,
+                                       puntuacionAcumulada, totalFichasEliminadas, combinacionesDetectadas);
+
+
             } else {
                 cout << "\nCoordenadas fuera de rango." << endl;
             }
