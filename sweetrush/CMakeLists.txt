@@ -5,11 +5,13 @@ project(sweetrush LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(sweetrush main.cpp
-    tablero.cpp
-    tablero.h
-    juego.h
-    juego.cpp)
+add_executable(sweetrush
+    codigo_sweetcrush/main.cpp
+    codigo_sweetcrush/tablero.cpp
+    codigo_sweetcrush/tablero.h
+    codigo_sweetcrush/juego.h
+    codigo_sweetcrush/juego.cpp
+)
 
 include(GNUInstallDirs)
 install(TARGETS sweetrush
