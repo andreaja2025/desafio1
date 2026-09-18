@@ -3,6 +3,21 @@
 
 void mostrarBienvenida();
 
+void mostrarMonitorMemoria(
+    const unsigned char* pTab,
+    unsigned short filas,
+    unsigned short columnas,
+    unsigned short bytesReservados
+    );
+
+void mostrarEstadisticasJugada(
+    unsigned int puntuacionTurno,
+    unsigned int puntuacionTotal,
+    unsigned int fichasTurno,
+    unsigned int fichasTotal,
+    unsigned int combosTurno
+    );
+
 void mostrarMenu(unsigned short &opcion);
 
 void ejecutarOpcion(
@@ -12,10 +27,10 @@ void ejecutarOpcion(
     unsigned short &columnas,
     unsigned short &bitsExtras,
     unsigned short &bytesReservados,
-    unsigned int &puntuacionAcumulada,
-    unsigned int &eliminacionesUsuario,
-    unsigned int &totalFichasEliminadas,
-    unsigned int &combinacionesDetectadas
+    unsigned int &puntuacion,
+    unsigned int &eliminacionesUser,
+    unsigned int &totalFichasElim,
+    unsigned int &combDetectadas
     );
 
 void mostrarResumenFinal(
@@ -26,3 +41,4 @@ void mostrarResumenFinal(
     );
 
 #endif // INTERFAZ_H
+
