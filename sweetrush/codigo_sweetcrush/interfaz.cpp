@@ -1,6 +1,7 @@
 #include "interfaz.h"
 #include "tablero.h"
 #include "juego.h"
+#include "modificaciones.h"
 
 #include <iostream>
 
@@ -30,9 +31,10 @@ void mostrarMenu(unsigned short &opcion)
 void ejecutarOpcion(
     unsigned short opcion,
     unsigned char*& pTab,
-    unsigned short filas,
-    unsigned short columnas,
-    unsigned short bitsExtras,
+    unsigned short &filas,
+    unsigned short &columnas,
+    unsigned short &bitsExtras,
+    unsigned short &bytesReservados,
     unsigned int &puntuacionAcumulada,
     unsigned int &eliminacionesUsuario,
     unsigned int &totalFichasEliminadas,
@@ -91,11 +93,60 @@ void ejecutarOpcion(
         break;
     }
 
-    case 2:
-    case 3:
+    case 2: {
+        unsigned short filaElegida;
+
+        cout << "\n[ ELIMINAR FILA ]" << endl;
+        cout << "Ingrese la fila a eliminar (1 a " << filas << "): ";
+        cin >> filaElegida;
+
+        if (eliminarFila(
+                pTab,
+                filas,
+                columnas,
+                bitsExtras,
+                bytesReservados,
+                filaElegida - 1)) {
+
+            cout << "\n--> Fila eliminada correctamente." << endl;
+
+        } else {
+            cout << "\nNo se pudo eliminar la fila." << endl;
+        }
+
+        break;
+    }
+
+    case 3: {
+        unsigned short columnaElegida;
+
+        cout << "\n[ ELIMINAR COLUMNA ]" << endl;
+        cout << "Ingrese la columna a eliminar (1 a " << columnas << "): ";
+        cin >> columnaElegida;
+
+        if (eliminarColumna(
+                pTab,
+                filas,
+                columnas,
+                bitsExtras,
+                bytesReservados,
+                columnaElegida - 1)) {
+
+            cout << "\n--> Columna eliminada correctamente." << endl;
+
+        } else {
+            cout << "\nNo se pudo eliminar la columna." << endl;
+        }
+
+        break;
+    }
+
     case 4:
+        cout << "\n[PROXIMAMENTE] Agregar fila." << endl;
+        break;
+
     case 5:
-        cout << "\n[PROXIMAMENTE] Modificacion de dimensiones del tablero." << endl;
+        cout << "\n[PROXIMAMENTE] Agregar columna." << endl;
         break;
 
     case 6:

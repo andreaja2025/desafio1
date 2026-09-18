@@ -8,9 +8,10 @@ void mostrarMenu(unsigned short &opcion);
 void ejecutarOpcion(
     unsigned short opcion,
     unsigned char*& pTab,
-    unsigned short filas,
-    unsigned short columnas,
-    unsigned short bitsExtras,
+    unsigned short &filas,
+    unsigned short &columnas,
+    unsigned short &bitsExtras,
+    unsigned short &bytesReservados,
     unsigned int &puntuacionAcumulada,
     unsigned int &eliminacionesUsuario,
     unsigned int &totalFichasEliminadas,

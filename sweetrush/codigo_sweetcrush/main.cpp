@@ -39,10 +39,16 @@ int main()
     }
 
     unsigned short bitsExtras = (bytes * 8) - bits;
+    unsigned short bytesReservados = bytes;
 
     unsigned char* pTab = crearTablero(bytes);
 
-    llenarTableroRandom(pTab, filas, columnas, bitsExtras);
+    llenarTableroRandom(
+        pTab,
+        filas,
+        columnas,
+        bitsExtras
+        );
 
     unsigned int puntuacionAcumulada = 0;
     unsigned int eliminacionesUsuario = 0;
@@ -62,8 +68,18 @@ int main()
     unsigned short opcion = 0;
 
     do {
-        verTableroBits(pTab, filas, columnas, bitsExtras);
-        verTableroFichas(pTab, filas, columnas);
+        verTableroBits(
+            pTab,
+            filas,
+            columnas,
+            bitsExtras
+            );
+
+        verTableroFichas(
+            pTab,
+            filas,
+            columnas
+            );
 
         mostrarMenu(opcion);
 
@@ -73,6 +89,7 @@ int main()
             filas,
             columnas,
             bitsExtras,
+            bytesReservados,
             puntuacionAcumulada,
             eliminacionesUsuario,
             totalFichasEliminadas,
