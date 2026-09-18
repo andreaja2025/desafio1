@@ -11,6 +11,8 @@ add_executable(sweetrush
     codigo_sweetcrush/tablero.h
     codigo_sweetcrush/juego.h
     codigo_sweetcrush/juego.cpp
+    codigo_sweetcrush/interfaz.h
+    codigo_sweetcrush/interfaz.cpp
 )
 
 include(GNUInstallDirs)
