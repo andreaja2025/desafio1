@@ -19,7 +19,7 @@
 #include "modificaciones.h"
 #include "tablero.h"
 
-    /**
+/**
  * Calcula la cantidad de bytes necesarios para almacenar el tablero
  * y la cantidad de bits extras del último byte.
  */

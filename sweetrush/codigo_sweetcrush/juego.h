@@ -24,12 +24,22 @@
  * ============================================================================
  */
 
-void subrutinaCascada(unsigned char* ptrTablero, unsigned short filas,
-                      unsigned short columnas, unsigned short bitsExtras);
+void subrutinaCascada(
+    unsigned char* ptrTablero,
+    unsigned short filas,
+    unsigned short columnas,
+    unsigned short bitsExtras
+    );
 
-bool subrutinaCombinaciones(unsigned char* ptrTablero, unsigned short filas, unsigned short columnas,
-                            unsigned short bitsExtras, unsigned int &puntuacion,
-                            unsigned int &totalFichasEliminadas, unsigned int &combDetectadas);
-
+bool subrutinaCombinaciones(
+    unsigned char* ptrTablero,
+    unsigned short filas,
+    unsigned short columnas,
+    unsigned short bitsExtras,
+    unsigned int &puntuacion,
+    unsigned int &totalFichasEliminadas,
+    unsigned int &combDetectadas,
+    unsigned int &combosDetectados
+    );
 
 #endif // JUEGO_H

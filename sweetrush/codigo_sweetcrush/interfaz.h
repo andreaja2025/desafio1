@@ -15,10 +15,11 @@ void mostrarEstadisticasJugada(
     unsigned int puntuacionTotal,
     unsigned int fichasTurno,
     unsigned int fichasTotal,
+    unsigned int rondasTurno,
     unsigned int combosTurno
     );
 
-void mostrarMenu(unsigned short &opcion);
+void mostrarMenu();
 
 void ejecutarOpcion(
     unsigned short opcion,
@@ -30,15 +31,16 @@ void ejecutarOpcion(
     unsigned int &puntuacion,
     unsigned int &eliminacionesUser,
     unsigned int &totalFichasElim,
-    unsigned int &combDetectadas
+    unsigned int &combDetectadas,
+    unsigned int &combosDetectados
     );
 
 void mostrarResumenFinal(
     unsigned int puntuacionAcumulada,
     unsigned int eliminacionesUsuario,
     unsigned int totalFichasEliminadas,
-    unsigned int combinacionesDetectadas
+    unsigned int combinacionesDetectadas,
+    unsigned int combosDetectados
     );
 
 #endif // INTERFAZ_H
-

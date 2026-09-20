@@ -24,33 +24,27 @@ unsigned char* crearTablero(unsigned short bytesTab) {
 }
 
 void verTableroBits(unsigned char* ptrTablero, unsigned short fil, unsigned short col, unsigned short bitsExtras) {
-    unsigned int bitsTab = fil * col * 3; // bits
-    unsigned short bytesTab = (bitsTab % 8 != 0) ? (bitsTab / 8 + 1) : (bitsTab / 8); // bytes precisos que requiere el tablero
-    // int cantFichas = fil*col; // esto x3 sería lo que se imprime
-    unsigned int bitsReserv = bytesTab * 8;
-    unsigned short byteInicial = 0; // primer byte del tablero jugable
-    // unsigned short bitTabActual = ;
+    unsigned int bitsTab = fil * col * 3;
+    unsigned short bytesTab = (bitsTab % 8 != 0) ? (bitsTab / 8 + 1) : (bitsTab / 8);
+    unsigned short byteInicial = 0;
 
-    cout << "bitsTab: " << bitsTab << endl;
-    cout << "bitsReserv: " << bitsReserv << endl;
-    cout << "bitsExtras: " << bitsExtras << endl;
-    cout << "Byte incial del tablero reservado: ";
-    for (int bit = 8; bit > 0; bit--) {
-        cout << ((ptrTablero[0] >> bit) & 1);
-    }
-    cout << endl;
-
+    // Encabezados de columnas
     for (unsigned short i = 0; i <= col; i++) {
         if (i < 10) {
             cout << '0' << i << "  ";
-        } else cout << i << "  ";
+        } else {
+            cout << i << "  ";
+        }
     }
 
     unsigned short cont3bits = 0;
     unsigned short contFilas = 1;
 
     for (unsigned short i = byteInicial; i < bytesTab; i++) {
-        for (int bit = 8; bit > 0; bit--) {
+        // Se calcula el bit inicial
+        int bitInicio = (i == byteInicial) ? (7 - bitsExtras) : 7;
+
+        for (int bit = bitInicio; bit >= 0; bit--) {
             if (cont3bits % (col * 3) == 0) {
                 cout << endl;
                 if (contFilas < 10) cout << '0' << contFilas;
@@ -58,19 +52,14 @@ void verTableroBits(unsigned char* ptrTablero, unsigned short fil, unsigned shor
                 contFilas++;
             }
             if ((cont3bits % 3) == 0) cout << " ";
-            // los condicionales sgtes son claves pa no imprimir los bits vacios a la izq
-            if (i == byteInicial) {          // (8-bitsExtras)
-                cout << ((ptrTablero[i] >> (bit - bitsExtras)) & 1);
-                cont3bits++;
-                if (bit - bitsExtras == 1) break; // sale del for cuando se acaba el 1er byte
-            } else {
-                cout << ((ptrTablero[i] >> bit) & 1);
-                cont3bits++;
-            }
+
+            cout << ((ptrTablero[i] >> bit) & 1);
+            cont3bits++;
         }
     }
     cout << endl;
 }
+
 
 // Genera un valor aleatorio de ficha (1 a 7)
 unsigned char generarFichaRandom() {

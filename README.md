@@ -1,133 +1,226 @@
-<div align="center">
+# Sweet Crush
+
+**Sweet Crush** es un juego desarrollado en **C++** para ejecutarse desde la terminal. El programa trabaja con un tablero dinámico de fichas y utiliza memoria dinámica, punteros y operaciones a nivel de bits como parte de su implementación.
+
+El jugador puede modificar el tablero, realizar eliminaciones y observar las estadísticas generadas durante la partida.
+
+---
+
+## ¿Cómo jugar?
+
+Al iniciar el programa, se solicitan las dimensiones iniciales del tablero. El programa valida que los valores ingresados sean números enteros y que se encuentren dentro de los límites permitidos.
+
+Una vez creado el tablero, las fichas son generadas aleatoriamente. Si existen combinaciones desde el inicio, estas son detectadas, eliminadas y procesadas mediante el sistema de cascadas antes de comenzar las jugadas del usuario.
+
+Las fichas se representan mediante diferentes **símbolos**, lo que permite identificar fácilmente su estado dentro del tablero.
+
+Cuando el usuario realiza una jugada, el programa verifica si existen combinaciones de tres o más fichas iguales en sentido horizontal o vertical. Las fichas que forman parte de una combinación son eliminadas y posteriormente se ejecuta la cascada, haciendo que las fichas superiores ocupen los espacios vacíos y generando nuevas fichas cuando sea necesario.
+
+El proceso continúa mientras se produzcan nuevas combinaciones.
+
+### Acciones disponibles
 
 <table>
   <tr>
-    <td width="75%" align="center">
-      <h2>UNIVERSIDAD DE ANTIOQUIA</h2>
-      <h3>Departamento de Ingeniería Electrónica y Telecomunicaciones</h3>
-      <h2>INFORMÁTICA II</h2>
-      <h3>Desafío No. 1</h3>
-    </td>
-    <td width="25%" align="center">
-      <img src="imagenes/logoudea.jpg" alt="Logo Universidad de Antioquia" width="200">
-    </td>
+    <th>#</th>
+    <th>Tipo</th>
+    <th>Acción</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>Eliminación</td>
+    <td>Eliminar ficha</td>
+    <td>Elimina una ficha seleccionada por el usuario.</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>Eliminación</td>
+    <td>Eliminar fila</td>
+    <td>Elimina una fila seleccionada por el usuario del tablero.</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>Eliminación</td>
+    <td>Eliminar columna</td>
+    <td>Elimina una columna seleccionada por el usuario del tablero.</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>Modificación</td>
+    <td>Agregar fila</td>
+    <td>Añade una nueva fila en la ubicación seleccionada por el usuario.</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>Modificación</td>
+    <td>Agregar columna</td>
+    <td>Añade una nueva columna en la ubicación seleccionada por el usuario.</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>Finalización</td>
+    <td>Terminar juego</td>
+    <td>Finaliza la partida y libera la memoria dinámica utilizada.</td>
   </tr>
 </table>
 
-</div>
+Las posiciones ingresadas por el usuario son validadas de acuerdo con las dimensiones actuales del tablero.
 
 ---
 
-## Integrantes
+## Validación de entrada y dimensiones
 
-* **ANDREA JULIETH ARIAS CANTILLO**
-* **SANTIAGO GARCIA NARANJO**
+El programa incorpora validaciones para evitar entradas incorrectas y problemas relacionados con las dimensiones del tablero.
 
----
+### Validación de datos
 
-## 1. CONTEXTUALIZACIÓN
+Las entradas realizadas por el usuario se reciben inicialmente como texto y se verifica que estén compuestas únicamente por dígitos.
 
-Se plantea hacer un programa jugable llamado **Sweet Crush**, con una dinámica similar pero limitada del famoso juego *Candy Crush*. Se pide utilizar memoria dinámica, uso de punteros y operaciones a nivel de bits para desarrollarlo.
+Si el usuario introduce caracteres que no corresponden a un número entero, el programa muestra un mensaje de error y solicita nuevamente el valor.
 
-Adicionalmente, se pide representar cada “pieza” o “ficha” del tablero con solamente **3 bits en memoria**, siendo un total de máximo **8 posibles estados**, garantizando que queden organizadas contiguamente en la memoria.
+También se verifica que el número ingresado se encuentre dentro del rango permitido para cada operación.
 
-También se pide llevar el conteo de unos parámetros del juego como número de combinaciones realizadas, cascadas, puntuación, etc.
+### Cálculo de dimensiones
 
----
+Las dimensiones iniciales del tablero se calculan teniendo en cuenta dos restricciones principales:
 
-## 2. ANÁLISIS Y CONSIDERACIONES
+* **Capacidad de visualización de la consola:** se establece un máximo de columnas que permite mostrar el tablero sin superar el ancho seguro definido.
+* **Capacidad de memoria:** se calcula la cantidad máxima de casillas que pueden almacenarse considerando que cada ficha utiliza **3 bits** y que el tablero se almacena utilizando un bloque de memoria representado mediante `unsigned short`.
 
-Inicialmente se plantea el uso de un arreglo dinámico para almacenar la representación en memoria de las fichas que se usarán, usando matemáticas para calcular el índice de cada pieza y su relación fila-columna para el tablero final.
+El número máximo de columnas se determina de acuerdo con las filas seleccionadas y la capacidad disponible de memoria.
 
-Debido a la representación en 3 bits de las piezas, estas podrán estar almacenadas en bytes diferentes, pero esto no debe afectar la funcionalidad ni visualización del tablero.
+Antes de crear el tablero se calcula la cantidad de bits y bytes necesarios. Si las dimensiones seleccionadas superan la capacidad establecida, el programa informa el error y evita realizar la asignación.
 
-También se analiza que para el tablero inicial, donde el usuario podrá empezar a jugar, solamente podrán estar vacíos entre **0 y 7 bits a la izquierda del arreglo dinámico**, y que esto está ligado a las dimensiones que el usuario ingrese.
-
-El usuario puede realizar por turno alguna de las siguientes acciones:
-
-* Eliminar ficha.
-* Eliminar fila.
-* Eliminar columna.
-* Agregar fila.
-* Agregar columna.
-* Terminar juego.
-
-A cada una de las acciones anteriores se le implementará una función.
-
-Para mejorar la experiencia del usuario para escoger la ficha que desee eliminar, se imprimirán en pantalla las coordenadas de **(Fila, Columna)** junto al tablero.
-
-### Funciones propuestas para la solución
-
-#### `crearTablero()`
-
-Reserva el espacio justo en bytes para la correcta representación de todas las fichas que irán en el tablero, teniendo en cuenta las dimensiones que el usuario ingresará.
-
-#### `agregarColumna()` / `agregarFila()`
-
-Amplían la matriz dinámica añadiendo nuevas casillas inicializadas y ajustando los punteros de memoria.
-
-#### `redimenTablero()`
-
-Redimensiona el tablero bajo el criterio de tener menos de un **65 % de utilización** del total de este.
-
-Puede llevarse un contador no visible para el usuario donde se calcule la cantidad de bits desocupados luego de cada jugada del usuario.
-
-#### `reordenarTablero()`
-
-Se encarga de que, luego de una combinación, el tablero quede sin espacios sin ficha asignada, lo que en la mayoría de los casos será la ficha que cae desde “arriba”, visualmente hablando, del espacio vacío (**Imagen 3. Subrutina Cascada**).
-
-#### `eliminarCombin()`
-
-Detecta las combinaciones que tiene el tablero actual y les cambia al estado de ficha especial **“vacío”**, donde luego deberá actuar la función `reordenarTablero()`. (**Imagen 2. Subrutina Combinaciones**).
-
-#### `void printTabFichas()`
-
-Función que muestra en consola el tablero con las fichas. Esta función se ejecutará solamente cuando el tablero a imprimir no tenga combinaciones.
-
-#### `void printTabBits()`
-
-Función que muestra en consola el tablero “real” en relación con la memoria que se ha reservado para el tablero y los bits que se encuentran en cada byte de este.
-
-Es posible que esta representación no tenga las mismas dimensiones que el tablero de fichas.
+Estas validaciones permiten evitar desbordamientos relacionados con las dimensiones y con la memoria utilizada por el tablero.
 
 ---
 
-## 3. DISEÑO
+## Puntuación y estadísticas
 
-Para garantizar el cumplimiento de las restricciones de memoria a bajo nivel y asegurar un flujo de ejecución modular, el diseño del programa se estructuró en un **bucle principal y dos subrutinas independientes**.
+Durante la partida se muestran diferentes estadísticas que permiten conocer el resultado de cada jugada y el progreso acumulado.
 
-A continuación, se presentan los diagramas de flujo.
+La información presentada incluye:
 
-### 3.1 Flujo Principal del Juego
+* **Puntuación obtenida en este turno:** puntos generados durante la jugada actual.
+* **Puntuación total acumulada:** total de puntos obtenidos durante la partida.
+* **Fichas destruidas en este turno:** cantidad de fichas eliminadas como resultado de la jugada actual y sus combinaciones.
+* **Total histórico de fichas destruidas:** cantidad acumulada de fichas eliminadas durante toda la partida.
+* **Rondas de combinación en este turno:** cantidad de rondas en las que se detectaron combinaciones durante la jugada.
+* **Combos detectados en este turno:** cantidad de grupos independientes de tres o más fichas iguales detectados durante la jugada.
 
-Representa el ciclo de vida de la partida desde la inicialización de variables globales y reserva de memoria dinámica **(m × n)**, pasando por la evaluación de combinaciones iniciales, hasta el menú interactivo con las opciones de manipulación del tablero (eliminación y adición de filas/columnas, redimensión de memoria al <65 %) y la liberación final de recursos de la memoria.
+La puntuación se calcula a partir de las fichas eliminadas. Cada ficha destruida aporta **10 puntos**.
 
-**Imagen 1. Flujo Principal del Juego**
+Por lo tanto, una combinación de tres fichas genera **30 puntos**, mientras que las combinaciones con más fichas generan una puntuación proporcional al número de fichas eliminadas.
 
-![Flujo Principal del Juego](imagenes/diagrama_principal.drawio.png)
+Las cascadas permiten que las fichas ocupen los espacios vacíos y que se generen nuevas fichas. Si estas nuevas fichas forman combinaciones, el proceso continúa y las fichas eliminadas siguen acumulándose en las estadísticas.
+
+---
+## Visualización del tablero
+
+El programa permite visualizar el tablero de dos formas:
+
+### Tablero de fichas
+
+Muestra las fichas mediante sus **símbolos**, facilitando la interacción y lectura del tablero por parte del usuario.
+
+### Tablero de bits
+
+Muestra la representación del tablero desde la perspectiva de la memoria utilizada, permitiendo observar los bits almacenados y la forma en que se distribuye la información de las fichas.
+
+Estas dos representaciones permiten diferenciar entre la visualización utilizada para jugar y la representación interna de los datos en memoria.
 
 ---
 
-### 3.2 Subrutina de Combinaciones
+## Estructura del proyecto
 
-Describe el proceso de análisis y puntuación. Utiliza un **mapa auxiliar de marcas (1 bit por casilla)** para detectar en simultáneo coincidencias de **3 o más fichas horizontales y verticales**, sin alterar el tablero original durante la inspección.
+```text
+sweetrush/
+│
+├── CMakeLists.txt
+├── README.md
+│
+├── codigo_sweetcrush/
+│   ├── main.cpp
+│   ├── juego.cpp
+│   ├── juego.h
+│   ├── tablero.cpp
+│   ├── tablero.h
+│   ├── interfaz.cpp
+│   ├── interfaz.h
+│   ├── modificaciones.cpp
+│   └── modificaciones.h
+│
+└── informe/
+    ├── README.md
+    ├── imagenes/
+    └── informe_final.pdf
+```
 
-Posteriormente, transforma los aciertos al estado **“Vacío”**, acumula las estadísticas de la jugada e invoca de forma iterativa a la **Subrutina Cascada**.
+### Módulos principales
 
-**Imagen 2. Subrutina Combinaciones**
+**`main.cpp`**
 
-![Subrutina de Combinaciones](imagenes/diagrama_subrutina_combinaciones.drawio.png)
+Contiene el punto de entrada del programa, la lectura de las dimensiones iniciales, el cálculo de la memoria necesaria, la validación de los límites del tablero y el flujo general de ejecución.
+
+**`tablero.cpp` / `tablero.h`**
+
+Gestionan la creación y manipulación del tablero, incluyendo la lectura, escritura y eliminación de fichas mediante operaciones a nivel de bits.
+
+**`juego.cpp` / `juego.h`**
+
+Contienen la lógica principal del juego, incluyendo la detección de combinaciones, las cascadas, la eliminación de fichas y el cálculo de puntuación y estadísticas.
+
+**`interfaz.cpp` / `interfaz.h`**
+
+Gestionan la interacción con el usuario, la validación de los valores ingresados, la presentación del menú, el monitor de memoria, las estadísticas y el resumen final.
+
+**`modificaciones.cpp` / `modificaciones.h`**
+
+Contienen las operaciones que permiten agregar o eliminar filas y columnas y realizar las modificaciones correspondientes sobre el tablero.
 
 ---
 
-### 3.3 Subrutina Cascada
+## Requisitos
 
-Muestra cómo caen las fichas y se llena el tablero.
+Para compilar y ejecutar el proyecto se requiere:
 
-Primero, recorre las columnas desde abajo hacia arriba para hacer bajar las fichas que quedaron flotando sobre huecos vacíos.
+* **C++17** o superior.
+* **CMake 3.16** o superior.
+* Un compilador compatible con C++17.
+* Un entorno de desarrollo compatible con CMake, como **Qt Creator**.
 
-Después, crea fichas aleatorias para ocupar los espacios sueltos que quedan en la
+El estándar utilizado se encuentra configurado en `CMakeLists.txt`.
 
-**Imagen 3. Subrutina Cascada**
+---
 
-![Subrutina de Cascada](imagenes/diagrama_subrutina_cascada.drawio.png)
+## Compilación y ejecución
+
+### Desde Qt Creator
+
+1. Abrir el proyecto mediante `CMakeLists.txt`.
+2. Seleccionar un kit compatible con C++17.
+3. Configurar el proyecto.
+4. Compilar mediante **Build**.
+5. Ejecutar mediante **Run**.
+
+### Desde la terminal
+
+Desde el directorio raíz del proyecto:
+
+```bash
+cmake -S . -B build
+cmake --build build
+```
+
+El ejecutable se genera dentro del directorio de compilación correspondiente.
+
+---
+
+## Autores
+
+**Andrea Julieth Arias Cantillo**
+**Santiago Garcia Naranjo**
+
+**Universidad de Antioquia — Informática II**
+**Desafío No. 1**

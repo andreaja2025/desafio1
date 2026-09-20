@@ -1,12 +1,57 @@
 #include <iostream>
 #include <iomanip>
+#include <string>
+#include <limits>
 
 #include "interfaz.h"
 #include "tablero.h"
 #include "juego.h"
 #include "modificaciones.h"
 
-    using namespace std;
+using namespace std;
+
+unsigned short leerValor(
+    unsigned short minimo,
+    unsigned short maximo,
+    const string& mensaje
+    )
+{
+    string entrada;
+
+    while (true) {
+
+        cout << mensaje;
+        cin >> entrada;
+
+        bool esNumero = true;
+
+        for (char caracter : entrada) {
+            if (caracter < '0' || caracter > '9') {
+                esNumero = false;
+                break;
+            }
+        }
+
+        if (!esNumero) {
+            cout << ">> Error: Entrada no valida. Por favor, ingrese un numero entero.\n";
+            continue;
+        }
+
+        unsigned int valor = 0;
+
+        for (char caracter : entrada) {
+            valor = valor * 10 + (caracter - '0');
+        }
+
+        if (valor < minimo || valor > maximo) {
+            cout << ">> Error: El valor debe estar entre "
+                 << minimo << " y " << maximo << ".\n";
+            continue;
+        }
+
+        return (unsigned short)valor;
+    }
+}
 
 void mostrarBienvenida()
 {
@@ -19,7 +64,7 @@ void mostrarBienvenida()
     cout << "  HHHHHHH   H H H   HHHHHH  HHHHHH    HH      HHHHHH  H    HH HHHHHH  HHHHHHH H    H\n";
     cout << "  HHHHHH     H H    HHHHHH  HHHHHH    HH      HHHHHH  H    HH HHHHHH  HHHHHH  H    H\n";
     cout << "\n";
-    cout << "                                 DESAFIO 1 : SWEET CRUSH                              \n";
+    cout << "                                  DESAFIO 1 : SWEET CRUSH                             \n";
     cout << "  ====================================================================================\n";
 }
 
@@ -31,22 +76,20 @@ void mostrarMonitorMemoria(
     )
 {
     unsigned int bitsUtiles = filas * columnas * 3;
+    unsigned short bytesUtiles;
 
-    unsigned short bytesUtiles =
-        (bitsUtiles % 8 != 0)
-            ? (bitsUtiles / 8 + 1)
-            : (bitsUtiles / 8);
+    if (bitsUtiles % 8 != 0) {
+        bytesUtiles = (bitsUtiles / 8) + 1;
+    } else {
+        bytesUtiles = bitsUtiles / 8;
+    }
+
+    const void* direccion = pTab;
 
     cout << "\n";
     cout << "  +---------------------------------------------------------------------------------+\n";
     cout << "  | ESTADO DEL BUFFER DE MEMORIA DINAMICA (HEAP)                                    |\n";
     cout << "  +---------------------------------------------------------------------------------+\n";
-
-    /*
-     * Se pasa el puntero a const void* mediante una asignacion implicita.
-     * No se utiliza ningun cast.
-     */
-    const void* direccion = pTab;
 
     cout << "  Puntero Base (RAM)     : " << direccion << "\n";
 
@@ -66,6 +109,7 @@ void mostrarEstadisticasJugada(
     unsigned int puntuacionTotal,
     unsigned int fichasTurno,
     unsigned int fichasTotal,
+    unsigned int rondasTurno,
     unsigned int combosTurno
     )
 {
@@ -74,27 +118,32 @@ void mostrarEstadisticasJugada(
     cout << "   |  ESTADISTICAS Y METRICAS DE LA JUGADA                                              |\n";
     cout << "   +---------------------------------------------------+--------------------------------+\n";
 
-    cout << "   |  Puntuacion Obtenida en este Turno                 |  +"
-         << left << setw(29)
+    cout << "   |  Puntuacion Obtenida en este Turno                |  "
+         << left << setw(30)
          << puntuacionTurno
          << "|\n";
 
-    cout << "   |  Puntuacion Total Acumulada                        |  "
+    cout << "   |  Puntuacion Total Acumulada                       |  "
          << left << setw(30)
          << puntuacionTotal
          << "|\n";
 
-    cout << "   |  Fichas Destruidas en este Turno                   |  "
+    cout << "   |  Fichas Destruidas en este Turno                  |  "
          << left << setw(30)
          << fichasTurno
          << "|\n";
 
-    cout << "   |  Total Historico de Fichas Destruidas              |  "
+    cout << "   |  Total Historico de Fichas Destruidas             |  "
          << left << setw(30)
          << fichasTotal
          << "|\n";
 
-    cout << "   |  Cascadas detectadas                               |  "
+    cout << "   |  Rondas de Combinacion en este Turno              |  "
+         << left << setw(30)
+         << rondasTurno
+         << "|\n";
+
+    cout << "   |  Combos Detectados en este Turno                  |  "
          << left << setw(30)
          << combosTurno
          << "|\n";
@@ -102,7 +151,7 @@ void mostrarEstadisticasJugada(
     cout << "   '------------------------------------------------------------------------------------'\n";
 }
 
-void mostrarMenu(unsigned short &opcion)
+void mostrarMenu()
 {
     cout << "\n";
     cout << "  +------------------ MENU DE CONTROL ------------------+\n";
@@ -115,9 +164,6 @@ void mostrarMenu(unsigned short &opcion)
     cout << "  |   [6] Finalizar partida                             |\n";
     cout << "  |                                                     |\n";
     cout << "  +-----------------------------------------------------+\n";
-    cout << "   Seleccione una opcion: ";
-
-    cin >> opcion;
 }
 
 void ejecutarOpcion(
@@ -130,265 +176,207 @@ void ejecutarOpcion(
     unsigned int &puntuacion,
     unsigned int &eliminacionesUser,
     unsigned int &totalFichasElim,
-    unsigned int &combDetectadas
+    unsigned int &combDetectadas,
+    unsigned int &combosDetectados
     )
 {
-    // Estado anterior para calcular las metricas del turno.
     unsigned int pAnt = puntuacion;
     unsigned int fAnt = totalFichasElim;
     unsigned int cAnt = combDetectadas;
+    unsigned int combosAnt = combosDetectados;
 
     bool accionEjecutada = false;
 
     switch (opcion) {
 
     case 1: {
-
         unsigned short fElegida;
         unsigned short cElegida;
 
         cout << "\n[ ELIMINAR FICHA ]\n";
 
-        cout << "Ingrese la Fila (1 a "
-             << filas
-             << "): ";
+        fElegida = leerValor(
+            1,
+            filas,
+            "Ingrese la fila (1-" + to_string(filas) + "): "
+            );
 
-        cin >> fElegida;
+        cElegida = leerValor(
+            1,
+            columnas,
+            "Ingrese la columna (1-" + to_string(columnas) + "): "
+            );
 
-        cout << "Ingrese la Columna (1 a "
-             << columnas
-             << "): ";
+        eliminarFicha(
+            pTab,
+            fElegida - 1,
+            cElegida - 1,
+            columnas,
+            bitsExtras
+            );
 
-        cin >> cElegida;
-
-        if (fElegida >= 1 &&
-            fElegida <= filas &&
-            cElegida >= 1 &&
-            cElegida <= columnas) {
-
-            eliminarFicha(
-                pTab,
-                fElegida - 1,
-                cElegida - 1,
-                columnas,
-                bitsExtras
-                );
-
-            eliminacionesUser++;
-
-            subrutinaCascada(
-                pTab,
-                filas,
-                columnas,
-                bitsExtras
-                );
-
-            subrutinaCombinaciones(
-                pTab,
-                filas,
-                columnas,
-                bitsExtras,
-                puntuacion,
-                totalFichasElim,
-                combDetectadas
-                );
-
-            accionEjecutada = true;
-
-        } else {
-
-            cout << "\nCoordenadas fuera de rango.\n";
-        }
+        eliminacionesUser++;
+        accionEjecutada = true;
 
         break;
     }
 
     case 2: {
-
         unsigned short filaAEliminar;
 
         cout << "\n[ ELIMINAR FILA ]\n";
 
-        cout << "Ingrese el numero de Fila a eliminar (1 a "
-             << filas
-             << "): ";
+        filaAEliminar = leerValor(
+            1,
+            filas,
+            "Ingrese la fila a eliminar (1-" + to_string(filas) + "): "
+            );
 
-        cin >> filaAEliminar;
+        bool exito = eliminarFila(
+            pTab,
+            filas,
+            columnas,
+            bitsExtras,
+            bytesReservados,
+            filaAEliminar - 1
+            );
 
-        if (filaAEliminar >= 1 &&
-            filaAEliminar <= filas) {
-
-            bool exito =
-                eliminarFila(
-                    pTab,
-                    filas,
-                    columnas,
-                    bitsExtras,
-                    bytesReservados,
-                    filaAEliminar - 1
-                    );
-
-            if (exito) {
-
-                subrutinaCascada(
-                    pTab,
-                    filas,
-                    columnas,
-                    bitsExtras
-                    );
-
-                subrutinaCombinaciones(
-                    pTab,
-                    filas,
-                    columnas,
-                    bitsExtras,
-                    puntuacion,
-                    totalFichasElim,
-                    combDetectadas
-                    );
-
-                accionEjecutada = true;
-
-            } else {
-
-                cout << "\n[Error] No se puede eliminar la fila "
-                        "(el tablero debe tener mas de 1 fila).\n";
-            }
-
+        if (exito) {
+            eliminacionesUser++;
+            accionEjecutada = true;
         } else {
-
-            cout << "\nNumero de fila fuera de rango.\n";
+            cout << "\n[Error] No se puede eliminar la fila "
+                    "(el tablero debe tener mas de 1 fila).\n";
         }
 
         break;
     }
 
     case 3: {
-
         unsigned short colAEliminar;
 
         cout << "\n[ ELIMINAR COLUMNA ]\n";
 
-        cout << "Ingrese el numero de Columna a eliminar (1 a "
-             << columnas
-             << "): ";
+        colAEliminar = leerValor(
+            1,
+            columnas,
+            "Ingrese la columna a eliminar (1-" + to_string(columnas) + "): "
+            );
 
-        cin >> colAEliminar;
+        bool exito = eliminarColumna(
+            pTab,
+            filas,
+            columnas,
+            bitsExtras,
+            bytesReservados,
+            colAEliminar - 1
+            );
 
-        if (colAEliminar >= 1 &&
-            colAEliminar <= columnas) {
-
-            bool exito =
-                eliminarColumna(
-                    pTab,
-                    filas,
-                    columnas,
-                    bitsExtras,
-                    bytesReservados,
-                    colAEliminar - 1
-                    );
-
-            if (exito) {
-
-                subrutinaCascada(
-                    pTab,
-                    filas,
-                    columnas,
-                    bitsExtras
-                    );
-
-                subrutinaCombinaciones(
-                    pTab,
-                    filas,
-                    columnas,
-                    bitsExtras,
-                    puntuacion,
-                    totalFichasElim,
-                    combDetectadas
-                    );
-
-                accionEjecutada = true;
-
-            } else {
-
-                cout << "\n[Error] No se puede eliminar la columna "
-                        "(el tablero debe tener mas de 1 columna).\n";
-            }
-
+        if (exito) {
+            eliminacionesUser++;
+            accionEjecutada = true;
         } else {
-
-            cout << "\nNumero de columna fuera de rango.\n";
+            cout << "\n[Error] No se puede eliminar la columna "
+                    "(el tablero debe tener mas de 1 columna).\n";
         }
 
         break;
     }
 
     case 4: {
-
         unsigned short posFila;
 
         cout << "\n[ AGREGAR FILA ]\n";
 
-        cout << "En que posicion desea insertar la fila? (1 a "
-             << (filas + 1)
-             << "): ";
+        // No se puede aumentar el numero de filas porque
+        // unsigned short ya alcanzo su valor maximo.
+        if (filas == numeric_limits<unsigned short>::max()) {
+            cout << ">> Error: No se puede insertar otra fila. "
+                    "Se alcanzo el maximo permitido de filas.\n";
+            break;
+        }
 
-        cin >> posFila;
+        posFila = leerValor(
+            1,
+            filas + 1,
+            "Ingrese la posicion de la nueva fila (1-" +
+                to_string(filas + 1) + "): "
+            );
 
-        if (agregarFila(
-                pTab,
-                filas,
-                columnas,
-                bitsExtras,
-                bytesReservados,
-                posFila)) {
+        bool exito = agregarFila(
+            pTab,
+            filas,
+            columnas,
+            bitsExtras,
+            bytesReservados,
+            posFila
+            );
 
-            subrutinaCascada(
-                pTab,
-                filas,
-                columnas,
-                bitsExtras
-                );
-
-            subrutinaCombinaciones(
-                pTab,
-                filas,
-                columnas,
-                bitsExtras,
-                puntuacion,
-                totalFichasElim,
-                combDetectadas
-                );
-
+        if (exito) {
             accionEjecutada = true;
-
         } else {
-
-            cout << "\n[Error] Posicion invalida o fuera de rango.\n";
+            cout << "\n[Error] Posicion invalida o fallo en asignacion de memoria.\n";
         }
 
         break;
     }
 
     case 5: {
-
         unsigned short posCol;
 
         cout << "\n[ AGREGAR COLUMNA ]\n";
 
-        cout << "En que posicion desea insertar la columna? (1 a "
-             << (columnas + 1)
-             << "): ";
+        unsigned int maxCasillasMemoria = 174760;
+        unsigned int maxColumnasMemoria = maxCasillasMemoria / filas;
 
-        cin >> posCol;
+        unsigned short maxColumnas = 25;
 
-        if (agregarColumna(
-                pTab,
-                filas,
-                columnas,
-                bitsExtras,
-                bytesReservados,
-                posCol)) {
+        if (maxColumnasMemoria < maxColumnas) {
+            maxColumnas = maxColumnasMemoria;
+        }
+
+        if (columnas >= maxColumnas) {
+            cout << ">> Error: No se puede insertar otra columna. "
+                    "Se alcanzo el maximo permitido de "
+                 << maxColumnas << " columnas.\n";
+            break;
+        }
+
+        posCol = leerValor(
+            1,
+            columnas + 1,
+            "Ingrese la posicion de la nueva columna (1-" +
+                to_string(columnas + 1) + "): "
+            );
+
+        bool exito = agregarColumna(
+            pTab,
+            filas,
+            columnas,
+            bitsExtras,
+            bytesReservados,
+            posCol
+            );
+
+        if (exito) {
+            accionEjecutada = true;
+        } else {
+            cout << "\n[!] Error: Posicion invalida o fallo en asignacion de memoria.\n";
+        }
+
+        break;
+    }
+
+    default:
+        cout << "\nRespuesta invalida.\n";
+        break;
+    }
+
+    if (accionEjecutada) {
+
+        bool huboCombinacion = false;
+
+        do {
 
             subrutinaCascada(
                 pTab,
@@ -397,52 +385,31 @@ void ejecutarOpcion(
                 bitsExtras
                 );
 
-            subrutinaCombinaciones(
+            huboCombinacion = subrutinaCombinaciones(
                 pTab,
                 filas,
                 columnas,
                 bitsExtras,
                 puntuacion,
                 totalFichasElim,
-                combDetectadas
+                combDetectadas,
+                combosDetectados
                 );
 
-            accionEjecutada = true;
+        } while (huboCombinacion);
 
-        } else {
-
-            cout << "\n[!] Error: Posicion invalida o fallo en "
-                    "asignacion de memoria.\n";
-        }
-
-        break;
-    }
-
-    default:
-
-        cout << "\nRespuesta invalida.\n";
-
-        break;
-    }
-
-    // Mostrar las metricas correspondientes a la accion realizada.
-    if (accionEjecutada) {
-
-        unsigned int pTurno =
-            puntuacion - pAnt;
-
-        unsigned int fTurno =
-            totalFichasElim - fAnt;
-
-        unsigned int cTurno =
-            combDetectadas - cAnt;
+        unsigned int puntuacionTurno = puntuacion - pAnt;
+        unsigned int fichasTurno = totalFichasElim - fAnt;
+        unsigned int combinacionesTurno = combDetectadas - cAnt;
+        unsigned int combosTurno = combosDetectados - combosAnt;
 
         mostrarEstadisticasJugada(
-            pTurno,
+            puntuacionTurno,
             puntuacion,
-            fTurno,
+            fichasTurno,
             totalFichasElim,
-            cTurno
+            combinacionesTurno,
+            combosTurno
             );
     }
 }
@@ -451,7 +418,8 @@ void mostrarResumenFinal(
     unsigned int puntuacionAcumulada,
     unsigned int eliminacionesUsuario,
     unsigned int totalFichasEliminadas,
-    unsigned int combinacionesDetectadas
+    unsigned int combinacionesDetectadas,
+    unsigned int combosDetectados
     )
 {
     cout << "\n";
@@ -463,24 +431,29 @@ void mostrarResumenFinal(
     cout << "   |  PARAMETRO / METRICA                               |  VALOR REGISTRADO              |\n";
     cout << "   +---------------------------------------------------+--------------------------------+\n";
 
-    cout << "   |  Puntuacion Total Acumulada                        |  "
+    cout << "   |  Puntuacion Total Acumulada                       |  "
          << left << setw(30)
          << puntuacionAcumulada
          << "|\n";
 
-    cout << "   |  Intervenciones Directas del Usuario               |  "
+    cout << "   |  Intervenciones Directas del Usuario              |  "
          << left << setw(30)
          << eliminacionesUsuario
          << "|\n";
 
-    cout << "   |  Total de Fichas Destruidas (Cascada + Usuario)    |  "
+    cout << "   |  Total de Fichas Destruidas (Cascada + Usuario)   |  "
          << left << setw(30)
          << totalFichasEliminadas
          << "|\n";
 
-    cout << "   |  Combinaciones Evaluadas (Combos)                  |  "
+    cout << "   |  Rondas de Combinacion Totales                    |  "
          << left << setw(30)
          << combinacionesDetectadas
+         << "|\n";
+
+    cout << "   |  Combos Detectados Totales                        |  "
+         << left << setw(30)
+         << combosDetectados
          << "|\n";
 
     cout << "   '------------------------------------------------------------------------------------'\n";
