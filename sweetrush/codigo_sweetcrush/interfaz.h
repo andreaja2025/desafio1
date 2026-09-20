@@ -1,6 +1,12 @@
 #ifndef INTERFAZ_H
 #define INTERFAZ_H
 
+    unsigned short leerValor(
+        unsigned short minimo,
+        unsigned short maximo,
+        const char mensaje[]
+        );
+
 void mostrarBienvenida();
 
 void mostrarMonitorMemoria(

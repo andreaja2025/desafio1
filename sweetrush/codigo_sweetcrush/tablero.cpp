@@ -61,7 +61,7 @@ void verTableroBits(unsigned char* ptrTablero, unsigned short fil, unsigned shor
 }
 
 
-// Genera un valor aleatorio de ficha (1 a 7)
+// Genera un valor aleatorio de ficha (1 a 6)
 unsigned char generarFichaRandom() {
     return (rand() % 6) + 1;
 }

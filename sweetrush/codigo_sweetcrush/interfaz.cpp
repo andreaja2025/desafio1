@@ -1,46 +1,33 @@
 #include <iostream>
 #include <iomanip>
-#include <string>
-#include <limits>
 
 #include "interfaz.h"
 #include "tablero.h"
 #include "juego.h"
 #include "modificaciones.h"
 
-using namespace std;
+    using namespace std;
 
 unsigned short leerValor(
     unsigned short minimo,
     unsigned short maximo,
-    const string& mensaje
+    const char mensaje[]
     )
 {
-    string entrada;
+    unsigned short valor;
 
     while (true) {
 
         cout << mensaje;
-        cin >> entrada;
+        cin >> valor;
 
-        bool esNumero = true;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
 
-        for (char caracter : entrada) {
-            if (caracter < '0' || caracter > '9') {
-                esNumero = false;
-                break;
-            }
-        }
-
-        if (!esNumero) {
-            cout << ">> Error: Entrada no valida. Por favor, ingrese un numero entero.\n";
+            cout << ">> Error: Entrada no valida. "
+                    "Por favor, ingrese un numero entero.\n";
             continue;
-        }
-
-        unsigned int valor = 0;
-
-        for (char caracter : entrada) {
-            valor = valor * 10 + (caracter - '0');
         }
 
         if (valor < minimo || valor > maximo) {
@@ -49,7 +36,9 @@ unsigned short leerValor(
             continue;
         }
 
-        return (unsigned short)valor;
+        cin.ignore(1000, '\n');
+
+        return valor;
     }
 }
 
@@ -195,17 +184,11 @@ void ejecutarOpcion(
 
         cout << "\n[ ELIMINAR FICHA ]\n";
 
-        fElegida = leerValor(
-            1,
-            filas,
-            "Ingrese la fila (1-" + to_string(filas) + "): "
-            );
+        cout << "Ingrese la fila (1-" << filas << "): ";
+        fElegida = leerValor(1, filas, "");
 
-        cElegida = leerValor(
-            1,
-            columnas,
-            "Ingrese la columna (1-" + to_string(columnas) + "): "
-            );
+        cout << "Ingrese la columna (1-" << columnas << "): ";
+        cElegida = leerValor(1, columnas, "");
 
         eliminarFicha(
             pTab,
@@ -226,11 +209,8 @@ void ejecutarOpcion(
 
         cout << "\n[ ELIMINAR FILA ]\n";
 
-        filaAEliminar = leerValor(
-            1,
-            filas,
-            "Ingrese la fila a eliminar (1-" + to_string(filas) + "): "
-            );
+        cout << "Ingrese la fila a eliminar (1-" << filas << "): ";
+        filaAEliminar = leerValor(1, filas, "");
 
         bool exito = eliminarFila(
             pTab,
@@ -257,11 +237,8 @@ void ejecutarOpcion(
 
         cout << "\n[ ELIMINAR COLUMNA ]\n";
 
-        colAEliminar = leerValor(
-            1,
-            columnas,
-            "Ingrese la columna a eliminar (1-" + to_string(columnas) + "): "
-            );
+        cout << "Ingrese la columna a eliminar (1-" << columnas << "): ";
+        colAEliminar = leerValor(1, columnas, "");
 
         bool exito = eliminarColumna(
             pTab,
@@ -288,19 +265,19 @@ void ejecutarOpcion(
 
         cout << "\n[ AGREGAR FILA ]\n";
 
-        // No se puede aumentar el numero de filas porque
-        // unsigned short ya alcanzo su valor maximo.
-        if (filas == numeric_limits<unsigned short>::max()) {
+        if (filas == 65535) {
             cout << ">> Error: No se puede insertar otra fila. "
                     "Se alcanzo el maximo permitido de filas.\n";
             break;
         }
 
+        cout << "Ingrese la posicion de la nueva fila (1-"
+             << filas + 1 << "): ";
+
         posFila = leerValor(
             1,
             filas + 1,
-            "Ingrese la posicion de la nueva fila (1-" +
-                to_string(filas + 1) + "): "
+            ""
             );
 
         bool exito = agregarFila(
@@ -342,11 +319,13 @@ void ejecutarOpcion(
             break;
         }
 
+        cout << "Ingrese la posicion de la nueva columna (1-"
+             << columnas + 1 << "): ";
+
         posCol = leerValor(
             1,
             columnas + 1,
-            "Ingrese la posicion de la nueva columna (1-" +
-                to_string(columnas + 1) + "): "
+            ""
             );
 
         bool exito = agregarColumna(

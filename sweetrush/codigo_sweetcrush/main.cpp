@@ -6,14 +6,12 @@ Universidad de Antioquia - Desafío 1
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <string>
-#include <limits>
 
 #include "tablero.h"
 #include "juego.h"
 #include "interfaz.h"
 
-using namespace std;
+    using namespace std;
 
 // LIMITES DEL TABLERO
 
@@ -44,16 +42,17 @@ constexpr unsigned int MAX_BYTES_MEMORIA = 65535;
 constexpr unsigned int MAX_CASILLAS_MEMORIA =
     (MAX_BYTES_MEMORIA * 8) / BITS_POR_FICHA;
 
+
 // LECTURA SEGURA DE NUMEROS
 
-// Lee un número entero dentro de un rango.
+// Lee un numero entero dentro de un rango.
 unsigned short leerOpcionSegura(
     unsigned short minimo,
     unsigned short maximo,
-    const string& prompt
+    const char prompt[]
     )
 {
-    string entrada;
+    char entrada[20];
 
     while (true) {
 
@@ -62,27 +61,34 @@ unsigned short leerOpcionSegura(
 
         bool esNumero = true;
 
-        for (char caracter : entrada) {
-            if (caracter < '0' || caracter > '9') {
+        for (unsigned short i = 0; entrada[i] != '\0'; i++) {
+
+            if (entrada[i] < '0' || entrada[i] > '9') {
                 esNumero = false;
                 break;
             }
         }
 
         if (!esNumero) {
-            cout << ">> Error: Entrada no valida. Por favor, ingrese un numero entero.\n";
+            cout << ">> Error: Entrada no valida. "
+                    "Por favor, ingrese un numero entero.\n";
+
+            cin.clear();
+            cin.ignore(1000, '\n');
+
             continue;
         }
 
         unsigned int valor = 0;
         bool excedeLimite = false;
 
-        for (char caracter : entrada) {
+        for (unsigned short i = 0; entrada[i] != '\0'; i++) {
 
-            unsigned int digito = caracter - '0';
+            unsigned int digito =
+                entrada[i] - '0';
 
-            // Evita que una entrada con demasiados digitos
-            // provoque un desbordamiento de unsigned int.
+            // Se verifica antes de multiplicar por 10
+            // para evitar desbordamientos.
             if (valor > (maximo - digito) / 10) {
                 excedeLimite = true;
                 break;
@@ -93,16 +99,26 @@ unsigned short leerOpcionSegura(
 
         if (excedeLimite) {
             cout << ">> Error: El valor ingresado es demasiado grande.\n";
+
+            cin.clear();
+            cin.ignore(1000, '\n');
+
             continue;
         }
 
         if (valor < minimo || valor > maximo) {
             cout << ">> Error: El valor debe estar entre "
                  << minimo << " y " << maximo << ".\n";
+
+            cin.clear();
+            cin.ignore(1000, '\n');
+
             continue;
         }
 
-        return (unsigned short)valor;
+        cin.ignore(1000, '\n');
+
+        return valor;
     }
 }
 
@@ -116,16 +132,20 @@ int main()
     // LECTURA DE FILAS
 
     // Las filas utilizan unsigned short.
-    // Por lo tanto, el maximo representable es 65535.
-    unsigned short maxFilas =
-        numeric_limits<unsigned short>::max();
+    // El maximo representable es 65535.
+    unsigned short maxFilas = 65535;
+
+    cout << "\nDe cuantas filas quiere su tablero? "
+            "(min 1, max "
+         << maxFilas
+         << "): ";
 
     unsigned short filas = leerOpcionSegura(
         1,
         maxFilas,
-        "\nDe cuantas filas quiere su tablero? (min 1, max " +
-            to_string(maxFilas) + "): "
+        ""
         );
+
 
     // LECTURA DE COLUMNAS
 
@@ -145,11 +165,15 @@ int main()
         maxColumnas = maxColumnasMemoria;
     }
 
+    cout << "Y cuantas columnas? "
+            "(min 1, max "
+         << maxColumnas
+         << "): ";
+
     unsigned short columnas = leerOpcionSegura(
         1,
         maxColumnas,
-        "Y cuantas columnas? (min 1, max " +
-            to_string(maxColumnas) + "): "
+        ""
         );
 
 
@@ -177,13 +201,15 @@ int main()
         return 1;
     }
 
-    unsigned short bytes = bytesCalculados;
+    unsigned short bytes =
+        bytesCalculados;
 
     unsigned short bitsExtras =
         (bytes * 8) - totalBits;
 
     unsigned short bytesReservados =
         bytes;
+
 
     // CREACION Y LLENADO DEL TABLERO
 
@@ -206,7 +232,6 @@ int main()
     // Almacena la cantidad de combos independientes detectados.
     unsigned int combosDetectados = 0;
 
-    // COMBINACIONES INICIALES
 
     // COMBINACIONES INICIALES
 
@@ -229,6 +254,7 @@ int main()
         combinacionesDetectadas,
         combosDetectados
         );
+
 
     // MENU PRINCIPAL
 
@@ -282,6 +308,7 @@ int main()
         delete[] pTab;
         pTab = nullptr;
     }
+
 
     // RESUMEN FINAL
 
