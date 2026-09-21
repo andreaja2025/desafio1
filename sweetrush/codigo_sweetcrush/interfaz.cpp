@@ -5,42 +5,23 @@
 #include "tablero.h"
 #include "juego.h"
 #include "modificaciones.h"
+#include "validaciones.h"
 
     using namespace std;
 
-unsigned short leerValor(
-    unsigned short minimo,
-    unsigned short maximo,
-    const char mensaje[]
-    )
-{
-    unsigned short valor;
+constexpr unsigned int MAX_BYTES_MEMORIA = 65535;
 
-    while (true) {
+constexpr unsigned int MAX_CASILLAS_MEMORIA =
+    (MAX_BYTES_MEMORIA * 8) / 3;
 
-        cout << mensaje;
-        cin >> valor;
+constexpr unsigned short ANCHO_CONSOLA_SEGURO = 80;
+constexpr unsigned short MARGEN_FILA_CHARS = 4;
+constexpr unsigned short CHARS_POR_COLUMNA = 3;
 
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(1000, '\n');
+constexpr unsigned short MAX_COLUMNAS_PANTALLA =
+    (ANCHO_CONSOLA_SEGURO - MARGEN_FILA_CHARS) /
+    CHARS_POR_COLUMNA;
 
-            cout << ">> Error: Entrada no valida. "
-                    "Por favor, ingrese un numero entero.\n";
-            continue;
-        }
-
-        if (valor < minimo || valor > maximo) {
-            cout << ">> Error: El valor debe estar entre "
-                 << minimo << " y " << maximo << ".\n";
-            continue;
-        }
-
-        cin.ignore(1000, '\n');
-
-        return valor;
-    }
-}
 
 void mostrarBienvenida()
 {
@@ -57,6 +38,7 @@ void mostrarBienvenida()
     cout << "  ====================================================================================\n";
 }
 
+
 void mostrarMonitorMemoria(
     const unsigned char* pTab,
     unsigned short filas,
@@ -65,6 +47,7 @@ void mostrarMonitorMemoria(
     )
 {
     unsigned int bitsUtiles = filas * columnas * 3;
+
     unsigned short bytesUtiles;
 
     if (bitsUtiles % 8 != 0) {
@@ -92,6 +75,7 @@ void mostrarMonitorMemoria(
          << bytesReservados
          << " bytes (Bloque fisico asignado en Heap)\n";
 }
+
 
 void mostrarEstadisticasJugada(
     unsigned int puntuacionTurno,
@@ -140,6 +124,7 @@ void mostrarEstadisticasJugada(
     cout << "   '------------------------------------------------------------------------------------'\n";
 }
 
+
 void mostrarMenu()
 {
     cout << "\n";
@@ -154,6 +139,7 @@ void mostrarMenu()
     cout << "  |                                                     |\n";
     cout << "  +-----------------------------------------------------+\n";
 }
+
 
 void ejecutarOpcion(
     unsigned short opcion,
@@ -184,11 +170,17 @@ void ejecutarOpcion(
 
         cout << "\n[ ELIMINAR FICHA ]\n";
 
-        cout << "Ingrese la fila (1-" << filas << "): ";
-        fElegida = leerValor(1, filas, "");
+        fElegida = leerOpcionSegura(
+            1,
+            filas,
+            "Ingrese la fila (1-"
+            );
 
-        cout << "Ingrese la columna (1-" << columnas << "): ";
-        cElegida = leerValor(1, columnas, "");
+        cElegida = leerOpcionSegura(
+            1,
+            columnas,
+            "Ingrese la columna (1-"
+            );
 
         eliminarFicha(
             pTab,
@@ -204,13 +196,17 @@ void ejecutarOpcion(
         break;
     }
 
+
     case 2: {
         unsigned short filaAEliminar;
 
         cout << "\n[ ELIMINAR FILA ]\n";
 
-        cout << "Ingrese la fila a eliminar (1-" << filas << "): ";
-        filaAEliminar = leerValor(1, filas, "");
+        filaAEliminar = leerOpcionSegura(
+            1,
+            filas,
+            "Ingrese la fila a eliminar (1-"
+            );
 
         bool exito = eliminarFila(
             pTab,
@@ -232,13 +228,17 @@ void ejecutarOpcion(
         break;
     }
 
+
     case 3: {
         unsigned short colAEliminar;
 
         cout << "\n[ ELIMINAR COLUMNA ]\n";
 
-        cout << "Ingrese la columna a eliminar (1-" << columnas << "): ";
-        colAEliminar = leerValor(1, columnas, "");
+        colAEliminar = leerOpcionSegura(
+            1,
+            columnas,
+            "Ingrese la columna a eliminar (1-"
+            );
 
         bool exito = eliminarColumna(
             pTab,
@@ -260,6 +260,7 @@ void ejecutarOpcion(
         break;
     }
 
+
     case 4: {
         unsigned short posFila;
 
@@ -271,13 +272,10 @@ void ejecutarOpcion(
             break;
         }
 
-        cout << "Ingrese la posicion de la nueva fila (1-"
-             << filas + 1 << "): ";
-
-        posFila = leerValor(
+        posFila = leerOpcionSegura(
             1,
             filas + 1,
-            ""
+            "Ingrese la posicion de la nueva fila (1-"
             );
 
         bool exito = agregarFila(
@@ -298,15 +296,17 @@ void ejecutarOpcion(
         break;
     }
 
+
     case 5: {
         unsigned short posCol;
 
         cout << "\n[ AGREGAR COLUMNA ]\n";
 
-        unsigned int maxCasillasMemoria = 174760;
-        unsigned int maxColumnasMemoria = maxCasillasMemoria / filas;
+        unsigned int maxColumnasMemoria =
+            MAX_CASILLAS_MEMORIA / filas;
 
-        unsigned short maxColumnas = 25;
+        unsigned short maxColumnas =
+            MAX_COLUMNAS_PANTALLA;
 
         if (maxColumnasMemoria < maxColumnas) {
             maxColumnas = maxColumnasMemoria;
@@ -315,17 +315,15 @@ void ejecutarOpcion(
         if (columnas >= maxColumnas) {
             cout << ">> Error: No se puede insertar otra columna. "
                     "Se alcanzo el maximo permitido de "
-                 << maxColumnas << " columnas.\n";
+                 << maxColumnas
+                 << " columnas.\n";
             break;
         }
 
-        cout << "Ingrese la posicion de la nueva columna (1-"
-             << columnas + 1 << "): ";
-
-        posCol = leerValor(
+        posCol = leerOpcionSegura(
             1,
             columnas + 1,
-            ""
+            "Ingrese la posicion de la nueva columna (1-"
             );
 
         bool exito = agregarColumna(
@@ -346,10 +344,12 @@ void ejecutarOpcion(
         break;
     }
 
+
     default:
         cout << "\nRespuesta invalida.\n";
         break;
     }
+
 
     if (accionEjecutada) {
 
@@ -377,10 +377,19 @@ void ejecutarOpcion(
 
         } while (huboCombinacion);
 
-        unsigned int puntuacionTurno = puntuacion - pAnt;
-        unsigned int fichasTurno = totalFichasElim - fAnt;
-        unsigned int combinacionesTurno = combDetectadas - cAnt;
-        unsigned int combosTurno = combosDetectados - combosAnt;
+
+        unsigned int puntuacionTurno =
+            puntuacion - pAnt;
+
+        unsigned int fichasTurno =
+            totalFichasElim - fAnt;
+
+        unsigned int combinacionesTurno =
+            combDetectadas - cAnt;
+
+        unsigned int combosTurno =
+            combosDetectados - combosAnt;
+
 
         mostrarEstadisticasJugada(
             puntuacionTurno,
@@ -392,6 +401,7 @@ void ejecutarOpcion(
             );
     }
 }
+
 
 void mostrarResumenFinal(
     unsigned int puntuacionAcumulada,

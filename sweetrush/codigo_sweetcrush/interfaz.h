@@ -1,12 +1,6 @@
 #ifndef INTERFAZ_H
 #define INTERFAZ_H
 
-    unsigned short leerValor(
-        unsigned short minimo,
-        unsigned short maximo,
-        const char mensaje[]
-        );
-
 void mostrarBienvenida();
 
 void mostrarMonitorMemoria(
@@ -33,7 +27,6 @@ void ejecutarOpcion(
     unsigned short &filas,
     unsigned short &columnas,
     unsigned short &bitsExtras,
-
     unsigned short &bytesReservados,
     unsigned int &puntuacion,
     unsigned int &eliminacionesUser,

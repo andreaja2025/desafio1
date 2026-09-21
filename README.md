@@ -149,7 +149,10 @@ sweetrush/
 │   ├── interfaz.cpp
 │   ├── interfaz.h
 │   ├── modificaciones.cpp
-│   └── modificaciones.h
+│   ├── modificaciones.h
+│   ├── validaciones.cpp 
+│   ├── validaciones.h
+│
 │
 └── informe/
     ├── README.md
@@ -161,7 +164,7 @@ sweetrush/
 
 **`main.cpp`**
 
-Contiene el punto de entrada del programa, la lectura de las dimensiones iniciales, el cálculo de la memoria necesaria, la validación de los límites del tablero y el flujo general de ejecución.
+Contiene el punto de entrada del programa, la lectura de las dimensiones iniciales, el cálculo de los límites y la memoria necesaria, y el flujo general de ejecución del juego.
 
 **`tablero.cpp` / `tablero.h`**
 
@@ -173,11 +176,15 @@ Contienen la lógica principal del juego, incluyendo la detección de combinacio
 
 **`interfaz.cpp` / `interfaz.h`**
 
-Gestionan la interacción con el usuario, la validación de los valores ingresados, la presentación del menú, el monitor de memoria, las estadísticas y el resumen final.
+Gestionan la interacción con el usuario, la presentación del menú, el monitor de memoria, las estadísticas y el resumen final.
 
 **`modificaciones.cpp` / `modificaciones.h`**
 
 Contienen las operaciones que permiten agregar o eliminar filas y columnas y realizar las modificaciones correspondientes sobre el tablero.
+
+**`validaciones.cpp` / `validaciones.h`**
+
+Contienen las funciones encargadas de validar los valores ingresados por el usuario, verificando que correspondan a números enteros y que se encuentren dentro de los límites establecidos para cada operación.
 
 ---
 
