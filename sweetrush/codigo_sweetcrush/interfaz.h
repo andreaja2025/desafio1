@@ -33,6 +33,7 @@ void ejecutarOpcion(
     unsigned short &filas,
     unsigned short &columnas,
     unsigned short &bitsExtras,
+
     unsigned short &bytesReservados,
     unsigned int &puntuacion,
     unsigned int &eliminacionesUser,

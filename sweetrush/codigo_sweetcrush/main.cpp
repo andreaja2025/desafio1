@@ -10,8 +10,9 @@ Universidad de Antioquia - Desafío 1
 #include "tablero.h"
 #include "juego.h"
 #include "interfaz.h"
+#include "validaciones.h"
 
-    using namespace std;
+using namespace std;
 
 // LIMITES DEL TABLERO
 
@@ -43,86 +44,6 @@ constexpr unsigned int MAX_CASILLAS_MEMORIA =
     (MAX_BYTES_MEMORIA * 8) / BITS_POR_FICHA;
 
 
-// LECTURA SEGURA DE NUMEROS
-
-// Lee un numero entero dentro de un rango.
-unsigned short leerOpcionSegura(
-    unsigned short minimo,
-    unsigned short maximo,
-    const char prompt[]
-    )
-{
-    char entrada[20];
-
-    while (true) {
-
-        cout << prompt;
-        cin >> entrada;
-
-        bool esNumero = true;
-
-        for (unsigned short i = 0; entrada[i] != '\0'; i++) {
-
-            if (entrada[i] < '0' || entrada[i] > '9') {
-                esNumero = false;
-                break;
-            }
-        }
-
-        if (!esNumero) {
-            cout << ">> Error: Entrada no valida. "
-                    "Por favor, ingrese un numero entero.\n";
-
-            cin.clear();
-            cin.ignore(1000, '\n');
-
-            continue;
-        }
-
-        unsigned int valor = 0;
-        bool excedeLimite = false;
-
-        for (unsigned short i = 0; entrada[i] != '\0'; i++) {
-
-            unsigned int digito =
-                entrada[i] - '0';
-
-            // Se verifica antes de multiplicar por 10
-            // para evitar desbordamientos.
-            if (valor > (maximo - digito) / 10) {
-                excedeLimite = true;
-                break;
-            }
-
-            valor = valor * 10 + digito;
-        }
-
-        if (excedeLimite) {
-            cout << ">> Error: El valor ingresado es demasiado grande.\n";
-
-            cin.clear();
-            cin.ignore(1000, '\n');
-
-            continue;
-        }
-
-        if (valor < minimo || valor > maximo) {
-            cout << ">> Error: El valor debe estar entre "
-                 << minimo << " y " << maximo << ".\n";
-
-            cin.clear();
-            cin.ignore(1000, '\n');
-
-            continue;
-        }
-
-        cin.ignore(1000, '\n');
-
-        return valor;
-    }
-}
-
-
 int main()
 {
     srand(time(nullptr));
@@ -135,15 +56,10 @@ int main()
     // El maximo representable es 65535.
     unsigned short maxFilas = 65535;
 
-    cout << "\nDe cuantas filas quiere su tablero? "
-            "(min 1, max "
-         << maxFilas
-         << "): ";
-
     unsigned short filas = leerOpcionSegura(
         1,
         maxFilas,
-        ""
+        "\nDe cuantas filas quiere su tablero? (min 1, max "
         );
 
 
@@ -165,15 +81,10 @@ int main()
         maxColumnas = maxColumnasMemoria;
     }
 
-    cout << "Y cuantas columnas? "
-            "(min 1, max "
-         << maxColumnas
-         << "): ";
-
     unsigned short columnas = leerOpcionSegura(
         1,
         maxColumnas,
-        ""
+        "\nY cuantas columnas? (min 1, max "
         );
 
 
@@ -278,11 +189,12 @@ int main()
         // El menu solamente muestra las opciones.
         mostrarMenu();
 
-        // La lectura y validacion de la opcion se realiza aqui.
+        // La lectura y validacion de la opcion
+        // se realiza mediante el modulo de validaciones.
         opcion = leerOpcionSegura(
             1,
             6,
-            "Seleccione una opcion (1-6): "
+            "Seleccione una opcion (1-"
             );
 
         ejecutarOpcion(

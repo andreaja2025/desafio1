@@ -15,6 +15,8 @@ add_executable(sweetrush
     codigo_sweetcrush/interfaz.cpp
     codigo_sweetcrush/modificaciones.h
     codigo_sweetcrush/modificaciones.cpp
+    codigo_sweetcrush/validaciones.h
+    codigo_sweetcrush/validaciones.cpp
 )
 
 include(GNUInstallDirs)
